@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-nif:
+    name: Build NIF (${{ matrix.os }}-${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - os: macos
+            arch: arm64
+            runner: macos-14
+            target: aarch64-apple-darwin
+            lib_name: libog_image_nif.dylib
+          - os: macos
+            arch: x86_64
+            runner: macos-13
+            target: x86_64-apple-darwin
+            lib_name: libog_image_nif.dylib
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            lib_name: libog_image_nif.so
+          - os: linux
+            arch: arm64
+            runner: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            lib_name: libog_image_nif.so
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install Erlang (for NIF headers)
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27"
+          gleam-version: "1.6"
+
+      - name: Build NIF
+        working-directory: native/og_image_nif
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Rename binary
+        run: |
+          cp native/og_image_nif/target/${{ matrix.target }}/release/${{ matrix.lib_name }} \
+             og_image_nif-${{ matrix.os }}-${{ matrix.arch }}.so
+
+      - name: Generate checksum
+        run: shasum -a 256 og_image_nif-${{ matrix.os }}-${{ matrix.arch }}.so > og_image_nif-${{ matrix.os }}-${{ matrix.arch }}.so.sha256
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nif-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            og_image_nif-${{ matrix.os }}-${{ matrix.arch }}.so
+            og_image_nif-${{ matrix.os }}-${{ matrix.arch }}.so.sha256
+
+  release:
+    name: Create Release
+    needs: build-nif
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create priv bundle for hex publishing
+        run: |
+          mkdir -p priv-bundle/priv
+          # Copy all platform binaries to priv/
+          cp artifacts/og_image_nif-*.so priv-bundle/priv/
+          # Create tarball
+          tar -czvf nif-bundle.tar.gz -C priv-bundle priv
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/og_image_nif-*.so
+            artifacts/og_image_nif-*.sha256
+            nif-bundle.tar.gz
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### For users (automatic)
+            The NIF will be downloaded automatically when you build.
+
+            ### For publishing to hex
+            1. Download `nif-bundle.tar.gz`
+            2. Extract: `tar -xzf nif-bundle.tar.gz`
+            3. This creates a `priv/` directory with all platform binaries
+            4. Run `gleam publish`

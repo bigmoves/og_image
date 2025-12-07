@@ -1,0 +1,13 @@
+*.beam
+*.ez
+build/
+erl_crash.dump
+
+# Rust
+native/*/target/
+native/*/Cargo.lock
+
+# NIF binaries (downloaded or built)
+# Note: For hex publishing, use `git add -f priv/og_image_nif-*.so` to include precompiled binaries
+priv/og_image_nif*.so
+priv/*.sha256
