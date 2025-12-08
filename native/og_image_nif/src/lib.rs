@@ -1,5 +1,5 @@
+use rustler::{Binary, Env, OwnedBinary};
 use std::io::Cursor;
-use rustler::{Env, Binary, OwnedBinary};
 use takumi::parley::GenericFamily;
 use takumi::{
     layout::{node::NodeKind, Viewport},
@@ -24,15 +24,21 @@ fn create_context_with_fonts() -> Result<GlobalContext, String> {
     let mut context = GlobalContext::default();
 
     // Load Geist Sans
-    context.font_context.load_and_store(GEIST_FONT, None, Some(GenericFamily::SansSerif))
+    context
+        .font_context
+        .load_and_store(GEIST_FONT, None, Some(GenericFamily::SansSerif))
         .map_err(|e| format!("Failed to load Geist font: {:?}", e))?;
 
     // Load Geist Mono
-    context.font_context.load_and_store(GEIST_MONO_FONT, None, Some(GenericFamily::Monospace))
+    context
+        .font_context
+        .load_and_store(GEIST_MONO_FONT, None, Some(GenericFamily::Monospace))
         .map_err(|e| format!("Failed to load Geist Mono font: {:?}", e))?;
 
     // Load Twemoji for emoji support
-    context.font_context.load_and_store(TWEMOJI_FONT, None, Some(GenericFamily::Emoji))
+    context
+        .font_context
+        .load_and_store(TWEMOJI_FONT, None, Some(GenericFamily::Emoji))
         .map_err(|e| format!("Failed to load Twemoji font: {:?}", e))?;
 
     Ok(context)
@@ -47,21 +53,15 @@ fn render_image<'a>(
     format: String,
     quality: i32,
 ) -> Result<Binary<'a>, String> {
-    // Debug: print received values
-    eprintln!("render_image called: width={}, height={}, format={}", width, height, format);
-
     // Parse JSON into NodeKind
-    let node: NodeKind = serde_json::from_str(&json_str)
-        .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+    let node: NodeKind =
+        serde_json::from_str(&json_str).map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
     // Create global context with bundled fonts
     let context = create_context_with_fonts()?;
 
     // Build render options
-    let viewport = Viewport::new(
-        Some(width.max(1) as u32),
-        Some(height.max(1) as u32),
-    );
+    let viewport = Viewport::new(Some(width.max(1) as u32), Some(height.max(1) as u32));
     let options = RenderOptionsBuilder::default()
         .viewport(viewport)
         .node(node)
@@ -95,8 +95,8 @@ fn render_image<'a>(
     let bytes = buffer.into_inner();
 
     // Create Erlang binary
-    let mut owned_binary = OwnedBinary::new(bytes.len())
-        .ok_or_else(|| "Failed to allocate binary".to_string())?;
+    let mut owned_binary =
+        OwnedBinary::new(bytes.len()).ok_or_else(|| "Failed to allocate binary".to_string())?;
     owned_binary.as_mut_slice().copy_from_slice(&bytes);
 
     Ok(owned_binary.release(env))
