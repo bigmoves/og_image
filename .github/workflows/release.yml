@@ -3,7 +3,8 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,7 +23,7 @@ jobs:
             lib_name: libog_image_nif.dylib
           - os: macos
             arch: x86_64
-            runner: macos-13
+            runner: macos-14
             target: x86_64-apple-darwin
             lib_name: libog_image_nif.dylib
           - os: linux
@@ -45,10 +46,14 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Install Erlang (for NIF headers)
-        uses: erlef/setup-beam@v1
+        if: matrix.os == 'linux'
+        uses: erlef/setup-beam@v1.18.2
         with:
           otp-version: "27"
-          gleam-version: "1.6"
+
+      - name: Install Erlang (macOS)
+        if: matrix.os == 'macos'
+        run: brew install erlang
 
       - name: Build NIF
         working-directory: native/og_image_nif
