@@ -60,11 +60,9 @@ pub fn text_node_to_takumi_json_test() {
 
 pub fn div_with_style_to_takumi_json_test() {
   let el =
-    element.element(
-      "div",
-      [attribute.styles([#("display", "flex")])],
-      [element.text("Hello")],
-    )
+    element.element("div", [attribute.styles([#("display", "flex")])], [
+      element.text("Hello"),
+    ])
 
   let result = transform.to_takumi_json(el) |> json.to_string
 
@@ -76,25 +74,23 @@ pub fn div_with_style_to_takumi_json_test() {
 
 pub fn img_to_takumi_json_test() {
   let el =
-    element.element(
-      "img",
-      [attribute.src("https://example.com/image.png")],
-      [],
-    )
+    element.element("img", [attribute.src("https://example.com/image.png")], [])
 
   let result = transform.to_takumi_json(el) |> json.to_string
 
   should.be_true(string.contains(result, "\"type\":\"image\""))
-  should.be_true(string.contains(result, "\"src\":\"https://example.com/image.png\""))
+  should.be_true(string.contains(
+    result,
+    "\"src\":\"https://example.com/image.png\"",
+  ))
 }
 
 pub fn p_element_becomes_container_with_inline_children_test() {
   let el =
-    element.element(
-      "p",
-      [attribute.styles([#("font-size", "24px")])],
-      [element.text("Hello "), element.text("World")],
-    )
+    element.element("p", [attribute.styles([#("font-size", "24px")])], [
+      element.text("Hello "),
+      element.text("World"),
+    ])
 
   let result = transform.to_takumi_json(el) |> json.to_string
 

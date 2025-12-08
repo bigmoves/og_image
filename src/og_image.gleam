@@ -41,10 +41,7 @@ pub fn defaults() -> Config {
 }
 
 /// Render a Lustre element to an image
-pub fn render(
-  el: Element(msg),
-  config: Config,
-) -> Result(BitArray, RenderError) {
+pub fn render(el: Element(msg), config: Config) -> Result(BitArray, RenderError) {
   // Transform element to Takumi JSON, wrapped in a root container
   let json_str =
     el

@@ -44,10 +44,7 @@ pub fn render_simple_element_returns_png_bytes_test() {
   let assert Ok(magic) = bit_array.slice(bytes, 0, 8)
 
   // PNG signature: 89 50 4E 47 0D 0A 1A 0A
-  should.equal(
-    magic,
-    <<0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A>>,
-  )
+  should.equal(magic, <<0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A>>)
 }
 
 pub fn render_with_jpeg_format_test() {
@@ -109,8 +106,5 @@ pub fn render_with_custom_dimensions_test() {
   // Just verify we get valid PNG bytes
   let assert Ok(bytes) = result
   let assert Ok(magic) = bit_array.slice(bytes, 0, 8)
-  should.equal(
-    magic,
-    <<0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A>>,
-  )
+  should.equal(magic, <<0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A>>)
 }

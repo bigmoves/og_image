@@ -20,14 +20,30 @@ pub type NodeType {
 pub fn node_type(tag: String) -> NodeType {
   case tag {
     // Container elements
-    "div" | "section" | "header" | "footer" | "nav" | "main" | "aside"
-    | "article"
-    -> Container
+    "div"
+    | "section"
+    | "header"
+    | "footer"
+    | "nav"
+    | "main"
+    | "aside"
+    | "article" -> Container
 
     // Text elements
-    "span" | "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "strong" | "em"
-    | "a" | "label" | "code" | "pre"
-    -> Text
+    "span"
+    | "p"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "strong"
+    | "em"
+    | "a"
+    | "label"
+    | "code"
+    | "pre" -> Text
 
     // Image element
     "img" -> Image
