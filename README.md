@@ -2,6 +2,8 @@
 
 Generate Open Graph images from Lustre elements.
 
+Built on [Takumi](https://takumi.kane.tw/).
+
 [![Package Version](https://img.shields.io/hexpm/v/og_image)](https://hex.pm/packages/og_image)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/og_image/)
 
