@@ -20,11 +20,20 @@ fn og_element() -> Element(Nil) {
         #("align-items", "center"),
         #("width", "100%"),
         #("height", "100%"),
-        #("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"),
+        #("background-color", "#292d3e"),
         #("padding", "40px"),
       ]),
     ],
     [
+      // Lucy image
+      html.img([
+        attribute.src("https://gleam.run/images/lucy/lucy.svg"),
+        attribute.styles([
+          #("width", "200px"),
+          #("height", "auto"),
+        ]),
+      ]),
+      // Title
       html.h1(
         [
           attribute.styles([
@@ -32,45 +41,11 @@ fn og_element() -> Element(Nil) {
             #("font-size", "72px"),
             #("font-weight", "700"),
             #("margin", "0"),
+            #("margin-top", "40px"),
             #("text-align", "center"),
           ]),
         ],
         [html.text("Hello from Gleam!")],
-      ),
-      html.p(
-        [
-          attribute.styles([
-            #("color", "rgba(255, 255, 255, 0.9)"),
-            #("font-size", "32px"),
-            #("margin-top", "20px"),
-            #("text-align", "center"),
-          ]),
-        ],
-        [html.text("OG images powered by Lustre + Takumi")],
-      ),
-      html.div(
-        [
-          attribute.styles([
-            #("display", "flex"),
-            #("align-items", "center"),
-            #("gap", "12px"),
-            #("margin-top", "60px"),
-            #("padding", "16px 32px"),
-            #("background-color", "rgba(255, 255, 255, 0.15)"),
-            #("border-radius", "50px"),
-          ]),
-        ],
-        [
-          html.span(
-            [
-              attribute.styles([
-                #("color", "white"),
-                #("font-size", "24px"),
-              ]),
-            ],
-            [html.text("Built with og_image")],
-          ),
-        ],
       ),
     ],
   )

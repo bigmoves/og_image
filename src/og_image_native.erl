@@ -1,5 +1,5 @@
 -module(og_image_native).
--export([hello/0, render_image/5]).
+-export([render_image/6]).
 -on_load(init/0).
 
 -define(APPNAME, og_image).
@@ -51,9 +51,6 @@ detect_platform() ->
 
     {Os, Arch}.
 
-%% NIF stubs - replaced when NIF loads
-hello() ->
-    erlang:nif_error(nif_not_loaded).
-
-render_image(_JsonStr, _Width, _Height, _Format, _Quality) ->
+%% NIF stub - replaced when NIF loads
+render_image(_JsonStr, _Width, _Height, _Format, _Quality, _Resources) ->
     erlang:nif_error(nif_not_loaded).

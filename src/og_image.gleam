@@ -1,6 +1,7 @@
 import gleam/json
 import gleam/result
 import lustre/element.{type Element}
+import og_image/fetch
 import og_image/ffi
 import og_image/transform
 
@@ -42,6 +43,12 @@ pub fn defaults() -> Config {
 
 /// Render a Lustre element to an image
 pub fn render(el: Element(msg), config: Config) -> Result(BitArray, RenderError) {
+  // Collect URLs from the element tree
+  let urls = transform.collect_image_urls(el)
+
+  // Fetch all external images
+  let resources = fetch.fetch_all(urls)
+
   // Transform element to Takumi JSON, wrapped in a root container
   let json_str =
     el
@@ -55,7 +62,14 @@ pub fn render(el: Element(msg), config: Config) -> Result(BitArray, RenderError)
     WebP(q) -> #("webp", q)
   }
 
-  // Call the NIF
-  ffi.render_image(json_str, config.width, config.height, format_str, quality)
+  // Call the NIF with pre-fetched resources
+  ffi.render_image(
+    json_str,
+    config.width,
+    config.height,
+    format_str,
+    quality,
+    resources,
+  )
   |> result.map_error(RenderFailed)
 }

@@ -1,4 +1,7 @@
 use rustler::{Binary, Env, OwnedBinary};
+use std::collections::HashMap;
+use std::sync::Arc;
+use takumi::resources::image::{load_image_source_from_bytes, ImageSource};
 use std::io::Cursor;
 use takumi::parley::GenericFamily;
 use takumi::{
@@ -13,11 +16,6 @@ static GEIST_MONO_FONT: &[u8] = include_bytes!("../assets/fonts/GeistMono[wght].
 static TWEMOJI_FONT: &[u8] = include_bytes!("../assets/fonts/TwemojiMozilla-colr.woff2");
 
 rustler::init!("og_image_native");
-
-#[rustler::nif]
-fn hello() -> String {
-    "Hello from Rust NIF!".to_string()
-}
 
 /// Create a GlobalContext with bundled fonts loaded
 fn create_context_with_fonts() -> Result<GlobalContext, String> {
@@ -52,20 +50,31 @@ fn render_image<'a>(
     height: i32,
     format: String,
     quality: i32,
+    resources: Vec<(String, Binary)>,
 ) -> Result<Binary<'a>, String> {
     // Parse JSON into NodeKind
     let node: NodeKind =
         serde_json::from_str(&json_str).map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
+    // Convert pre-fetched resources to ImageSource map
+    let fetched_resources: HashMap<Arc<str>, Arc<ImageSource>> = resources
+        .into_iter()
+        .filter_map(|(url, bytes)| {
+            let image_source = load_image_source_from_bytes(bytes.as_slice()).ok()?;
+            Some((Arc::from(url.as_str()), image_source))
+        })
+        .collect();
+
     // Create global context with bundled fonts
     let context = create_context_with_fonts()?;
 
-    // Build render options
+    // Build render options with fetched resources
     let viewport = Viewport::new(Some(width.max(1) as u32), Some(height.max(1) as u32));
     let options = RenderOptionsBuilder::default()
         .viewport(viewport)
         .node(node)
         .global(&context)
+        .fetched_resources(fetched_resources)
         .build()
         .map_err(|e| format!("Failed to build render options: {}", e))?;
 

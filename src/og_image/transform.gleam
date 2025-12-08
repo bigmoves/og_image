@@ -267,3 +267,37 @@ fn collect_text_content(children: List(Element(msg))) -> String {
   })
   |> string.concat
 }
+
+/// Collect all image URLs from a Lustre element tree
+/// Returns URLs that start with http:// or https://
+pub fn collect_image_urls(el: Element(msg)) -> List(String) {
+  collect_urls_recursive(el, [])
+  |> list.unique
+}
+
+fn collect_urls_recursive(el: Element(msg), acc: List(String)) -> List(String) {
+  case el {
+    vnode.Element(tag: "img", attributes: attrs, ..) -> {
+      let src = extract_src(attrs)
+      case
+        string.starts_with(src, "http://")
+        || string.starts_with(src, "https://")
+      {
+        True -> [src, ..acc]
+        False -> acc
+      }
+    }
+
+    vnode.Element(children: children, ..) ->
+      list.fold(children, acc, fn(acc, child) {
+        collect_urls_recursive(child, acc)
+      })
+
+    vnode.Fragment(children: children, ..) ->
+      list.fold(children, acc, fn(acc, child) {
+        collect_urls_recursive(child, acc)
+      })
+
+    _ -> acc
+  }
+}

@@ -1,8 +1,6 @@
-@external(erlang, "og_image_native", "hello")
-pub fn hello() -> String
-
-/// Render an image from JSON, returns Ok(bytes) or Error(reason)
-/// Quality: 0-100 for JPEG, -1 for default
+/// Render an image from JSON with pre-fetched resources
+/// Resources is a list of (url, bytes) tuples
+/// Quality: 0-100 for JPEG/WebP, -1 for default
 @external(erlang, "og_image_native", "render_image")
 pub fn render_image(
   json_str: String,
@@ -10,4 +8,5 @@ pub fn render_image(
   height: Int,
   format: String,
   quality: Int,
+  resources: List(#(String, BitArray)),
 ) -> Result(BitArray, String)
