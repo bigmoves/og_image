@@ -1,14 +1,13 @@
 import gleam/io
 import lustre/attribute
-import lustre/element
+import lustre/element/html
 import og_image
 import simplifile
 
 pub fn main() {
   // Create a styled OG image layout using Lustre elements
   let og_element =
-    element.element(
-      "div",
+    html.div(
       [
         attribute.styles([
           #("display", "flex"),
@@ -23,8 +22,7 @@ pub fn main() {
       ],
       [
         // Title
-        element.element(
-          "h1",
+        html.h1(
           [
             attribute.styles([
               #("color", "white"),
@@ -34,11 +32,10 @@ pub fn main() {
               #("text-align", "center"),
             ]),
           ],
-          [element.text("Hello from Gleam!")],
+          [html.text("Hello from Gleam!")],
         ),
         // Subtitle
-        element.element(
-          "p",
+        html.p(
           [
             attribute.styles([
               #("color", "rgba(255, 255, 255, 0.9)"),
@@ -47,11 +44,10 @@ pub fn main() {
               #("text-align", "center"),
             ]),
           ],
-          [element.text("OG images powered by Lustre + Takumi")],
+          [html.text("OG images powered by Lustre + Takumi")],
         ),
         // Footer badge
-        element.element(
-          "div",
+        html.div(
           [
             attribute.styles([
               #("display", "flex"),
@@ -64,15 +60,14 @@ pub fn main() {
             ]),
           ],
           [
-            element.element(
-              "span",
+            html.span(
               [
                 attribute.styles([
                   #("color", "white"),
                   #("font-size", "24px"),
                 ]),
               ],
-              [element.text("Built with og_image")],
+              [html.text("Built with og_image")],
             ),
           ],
         ),

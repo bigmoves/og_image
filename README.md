@@ -18,13 +18,12 @@ Precompiled binaries are included for:
 ## Usage
 
 ```gleam
-import lustre/element
 import lustre/attribute
+import lustre/element/html
 import og_image
 
 pub fn generate_og_image() {
-  let el = element.element(
-    "div",
+  let el = html.div(
     [attribute.styles([
       #("display", "flex"),
       #("flex-direction", "column"),
@@ -35,10 +34,9 @@ pub fn generate_og_image() {
       #("background-color", "#1a1a2e"),
     ])],
     [
-      element.element(
-        "h1",
+      html.h1(
         [attribute.styles([#("color", "white"), #("font-size", "48px")])],
-        [element.text("My Blog Post")],
+        [html.text("My Blog Post")],
       ),
     ],
   )
