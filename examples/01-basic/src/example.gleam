@@ -1,3 +1,7 @@
+//// Unified example - works on both Erlang and JavaScript targets
+//// Run with: gleam run --target erlang
+//// Or:       gleam run --target javascript
+
 import gleam/io
 import lustre/attribute
 import lustre/element/html
@@ -50,11 +54,10 @@ pub fn main() {
 
   case og_image.render(og_element, og_image.defaults()) {
     Ok(png_bytes) -> {
-      // Save to file
+      io.println("Render successful!")
       case simplifile.write_bits("output.png", png_bytes) {
         Ok(_) -> io.println("Saved to output.png")
-        Error(e) ->
-          io.println("Failed to save: " <> simplifile.describe_error(e))
+        Error(e) -> io.println("Failed to save: " <> simplifile.describe_error(e))
       }
     }
     Error(e) -> {
@@ -70,38 +73,6 @@ pub fn main() {
           io.println("  Render failed: " <> reason)
       }
     }
-  }
-
-  // Also render as JPEG
-  io.println("Rendering JPEG version...")
-  let jpeg_config =
-    og_image.Config(..og_image.defaults(), format: og_image.Jpeg(90))
-
-  case og_image.render(og_element, jpeg_config) {
-    Ok(jpeg_bytes) -> {
-      case simplifile.write_bits("output.jpg", jpeg_bytes) {
-        Ok(_) -> io.println("Saved to output.jpg")
-        Error(e) ->
-          io.println("Failed to save: " <> simplifile.describe_error(e))
-      }
-    }
-    Error(_) -> io.println("JPEG render failed")
-  }
-
-  // And WebP
-  io.println("Rendering WebP version...")
-  let webp_config =
-    og_image.Config(..og_image.defaults(), format: og_image.WebP(80))
-
-  case og_image.render(og_element, webp_config) {
-    Ok(webp_bytes) -> {
-      case simplifile.write_bits("output.webp", webp_bytes) {
-        Ok(_) -> io.println("Saved to output.webp")
-        Error(e) ->
-          io.println("Failed to save: " <> simplifile.describe_error(e))
-      }
-    }
-    Error(_) -> io.println("WebP render failed")
   }
 
   io.println("Done!")
