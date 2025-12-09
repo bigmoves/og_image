@@ -1,9 +1,19 @@
+@target(erlang)
 import gleam/bit_array
+
+@target(erlang)
 import gleeunit/should
+
+@target(erlang)
 import lustre/attribute
+
+@target(erlang)
 import lustre/element
+
+@target(erlang)
 import og_image
 
+@target(erlang)
 pub fn render_simple_element_returns_png_bytes_test() {
   let el =
     element.element(
@@ -47,6 +57,7 @@ pub fn render_simple_element_returns_png_bytes_test() {
   should.equal(magic, <<0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A>>)
 }
 
+@target(erlang)
 pub fn render_with_jpeg_format_test() {
   let el =
     element.element(
@@ -67,6 +78,7 @@ pub fn render_with_jpeg_format_test() {
   should.equal(magic, <<0xFF, 0xD8, 0xFF>>)
 }
 
+@target(erlang)
 pub fn render_with_webp_format_test() {
   let el =
     element.element(
@@ -89,6 +101,7 @@ pub fn render_with_webp_format_test() {
   should.equal(webp, <<"WEBP":utf8>>)
 }
 
+@target(erlang)
 pub fn render_with_custom_dimensions_test() {
   let el =
     element.element(
