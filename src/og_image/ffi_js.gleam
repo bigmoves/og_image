@@ -1,6 +1,7 @@
 //// JavaScript FFI bindings for takumi-wasm
 //// Only compiled on JavaScript target
 
+@target(javascript)
 import gleam/javascript/promise.{type Promise}
 
 /// Opaque type representing a WASM module
