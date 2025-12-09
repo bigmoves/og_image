@@ -9,6 +9,12 @@ native/*/Cargo.lock
 
 # Node.js
 node_modules/
+package-lock.json
+
+# Generated images
+output*.png
+output*.jpg
+output*.webp
 
 # NIF binaries (downloaded or built)
 # Note: For hex publishing, use `git add -f priv/og_image_nif-*.so` to include precompiled binaries
