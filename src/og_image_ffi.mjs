@@ -1,11 +1,9 @@
 // JavaScript FFI for og_image - wraps takumi-wasm (synchronous)
 import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ok, Error, toList, BitArray } from "./gleam.mjs";
 
-const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -24,9 +22,14 @@ function findPrivDir(startDir, subdir, checkFile) {
   throw new globalThis.Error(`Could not find og_image priv/${subdir} directory`);
 }
 
-// Load WASM module from priv/wasm at module load time
-const wasmDir = findPrivDir(__dirname, "wasm", "takumi_wasm_bg.wasm");
-const { initSync, Renderer } = await import(join(wasmDir, "takumi_wasm.js"));
+// Load vendored modules from priv/vendor at module load time
+const vendorDir = findPrivDir(__dirname, "vendor", "takumi_wasm_bg.wasm");
+const { initSync, Renderer } = await import(join(vendorDir, "takumi_wasm.js"));
+
+// Import sync-fetch using createRequire since it's bundled as CommonJS
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const syncFetch = require(join(vendorDir, "sync-fetch.cjs"));
 
 let renderer = null;
 
@@ -34,8 +37,8 @@ let renderer = null;
 function ensureInitialized() {
   if (renderer) return;
 
-  // Load WASM bytes from priv/wasm
-  const wasmPath = join(wasmDir, "takumi_wasm_bg.wasm");
+  // Load WASM bytes from priv/vendor
+  const wasmPath = join(vendorDir, "takumi_wasm_bg.wasm");
   const wasmBytes = readFileSync(wasmPath);
 
   // Initialize WASM synchronously
@@ -97,19 +100,17 @@ export function renderImage(jsonStr, width, height, format, quality, resources) 
   }
 }
 
-// Synchronous fetch for Node.js using curl
+// Synchronous fetch for Node.js using sync-fetch
 export function fetchAllSync(urls) {
-  const { execSync } = require("node:child_process");
   const results = [];
 
   for (const url of urls.toArray()) {
     try {
-      const buffer = execSync(`curl -sL "${url}"`, {
-        encoding: "buffer",
-        maxBuffer: 50 * 1024 * 1024,
-        timeout: 30000,
-      });
-      results.push([url, new BitArray(new Uint8Array(buffer))]);
+      const response = syncFetch(url);
+      if (response.ok) {
+        const buffer = response.buffer();
+        results.push([url, new BitArray(new Uint8Array(buffer))]);
+      }
     } catch {
       // Skip failed fetches silently
     }

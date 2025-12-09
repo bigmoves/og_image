@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@takumi-rs/wasm": "^0.57.3"
+    "@takumi-rs/wasm": "^0.57.3",
+    "sync-fetch": "^0.6.0-2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.1"
+  },
+  "scripts": {
+    "bundle-vendor": "esbuild node_modules/sync-fetch/index.js --bundle --platform=node --format=cjs --outfile=priv/vendor/sync-fetch.cjs && esbuild node_modules/sync-fetch/worker.js --bundle --platform=node --format=cjs --outfile=priv/vendor/worker.js && cp node_modules/@takumi-rs/wasm/pkg/takumi_wasm.js priv/vendor/ && cp node_modules/@takumi-rs/wasm/pkg/takumi_wasm_bg.wasm priv/vendor/"
   }
 }
