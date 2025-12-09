@@ -3,10 +3,30 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { initSync, Renderer } from "@takumi-rs/wasm";
 import { Ok, Error, toList, BitArray } from "./gleam.mjs";
 
 const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Find a priv subdirectory by walking up from current location
+function findPrivDir(startDir, subdir, checkFile) {
+  let dir = startDir;
+  for (let i = 0; i < 10; i++) {
+    const candidate = join(dir, "priv", subdir);
+    try {
+      readFileSync(join(candidate, checkFile));
+      return candidate;
+    } catch {
+      dir = dirname(dir);
+    }
+  }
+  throw new globalThis.Error(`Could not find og_image priv/${subdir} directory`);
+}
+
+// Load WASM module from priv/wasm at module load time
+const wasmDir = findPrivDir(__dirname, "wasm", "takumi_wasm_bg.wasm");
+const { initSync, Renderer } = await import(join(wasmDir, "takumi_wasm.js"));
 
 let renderer = null;
 
@@ -14,21 +34,16 @@ let renderer = null;
 function ensureInitialized() {
   if (renderer) return;
 
-  // Resolve WASM file from node_modules
-  const wasmPath = require.resolve("@takumi-rs/wasm/takumi_wasm_bg.wasm");
+  // Load WASM bytes from priv/wasm
+  const wasmPath = join(wasmDir, "takumi_wasm_bg.wasm");
   const wasmBytes = readFileSync(wasmPath);
 
   // Initialize WASM synchronously
   initSync({ module: wasmBytes });
   renderer = new Renderer();
 
-  // Resolve fonts from og_image package priv/fonts directory
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  // From build/dev/javascript/og_image/ -> priv/fonts/
-  // We need to find the package root - go up to find priv/
-  const fontsDir = findFontsDir(__dirname);
-
+  // Load fonts from priv/fonts
+  const fontsDir = findPrivDir(__dirname, "fonts", "Geist[wght].woff2");
   const fontFiles = [
     "Geist[wght].woff2",
     "GeistMono[wght].woff2",
@@ -44,21 +59,6 @@ function ensureInitialized() {
       throw new globalThis.Error(`Failed to load bundled font ${file}: ${e.message}`);
     }
   }
-}
-
-// Find priv/fonts directory by walking up from current location
-function findFontsDir(startDir) {
-  let dir = startDir;
-  for (let i = 0; i < 10; i++) {
-    const candidate = join(dir, "priv", "fonts");
-    try {
-      readFileSync(join(candidate, "Geist[wght].woff2"));
-      return candidate;
-    } catch {
-      dir = dirname(dir);
-    }
-  }
-  throw new globalThis.Error("Could not find og_image priv/fonts directory");
 }
 
 export function renderImage(jsonStr, width, height, format, quality, resources) {
