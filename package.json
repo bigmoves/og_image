@@ -1,0 +1,8 @@
+{
+  "name": "og_image",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@takumi-rs/wasm": "^0.57.3"
+  }
+}
