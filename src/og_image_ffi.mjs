@@ -1,6 +1,6 @@
 // JavaScript FFI for og_image - wraps takumi-wasm
-import { Ok, Error } from "./gleam.mjs";
 import * as takumi from "@takumi-rs/wasm";
+import { Ok, Error, toList, BitArray } from "./gleam.mjs";
 
 let renderer = null;
 let initPromise = null;
@@ -30,10 +30,10 @@ export function renderImage(jsonStr, width, height, format, quality, resources) 
   try {
     const node = JSON.parse(jsonStr);
 
-    // Convert List of tuples to Map
+    // Convert Gleam List of tuples to Map
     const fetchedResources = new Map();
     for (const [url, bytes] of resources) {
-      fetchedResources.set(url, bytes);
+      fetchedResources.set(url, bytes.rawBuffer);
     }
 
     const options = {
@@ -49,7 +49,8 @@ export function renderImage(jsonStr, width, height, format, quality, resources) 
     }
 
     const result = renderer.render(node, options);
-    return new Ok(toBitArray(result));
+
+    return new Ok(new BitArray(new Uint8Array(result)));
   } catch (e) {
     return new Error(e.message || String(e));
   }
@@ -62,25 +63,12 @@ export async function fetchAll(urls) {
         const response = await fetch(url);
         if (!response.ok) return null;
         const buffer = await response.arrayBuffer();
-        return [url, toBitArray(new Uint8Array(buffer))];
+        return [url, new BitArray(new Uint8Array(buffer))];
       } catch {
         return null;
       }
     })
   );
+
   return toList(results.filter(Boolean));
-}
-
-// Helper to convert Uint8Array to Gleam BitArray
-function toBitArray(uint8Array) {
-  return { buffer: uint8Array };
-}
-
-// Helper to convert JS array to Gleam List
-function toList(array) {
-  let list = { head: undefined, tail: undefined };
-  for (let i = array.length - 1; i >= 0; i--) {
-    list = { head: array[i], tail: list };
-  }
-  return list;
 }
