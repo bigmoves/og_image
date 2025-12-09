@@ -1,14 +1,9 @@
 // JavaScript FFI for og_image - wraps takumi-wasm
 import { Ok, Error } from "./gleam.mjs";
+import * as takumi from "@takumi-rs/wasm";
 
 let renderer = null;
 let initPromise = null;
-
-// Lazy import to avoid issues when not on JS target
-async function getTakumiWasm() {
-  const module = await import("@takumi-rs/wasm");
-  return module;
-}
 
 export async function initWasm(wasmModule) {
   if (initPromise) {
@@ -16,7 +11,6 @@ export async function initWasm(wasmModule) {
   }
 
   initPromise = (async () => {
-    const takumi = await getTakumiWasm();
     await takumi.default({ module_or_path: wasmModule });
     renderer = new takumi.Renderer();
   })();
