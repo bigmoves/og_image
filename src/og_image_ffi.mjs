@@ -1,5 +1,6 @@
 // JavaScript FFI for og_image - wraps takumi-wasm (synchronous)
 import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ok, Error, toList, BitArray } from "./gleam.mjs";
@@ -25,11 +26,6 @@ function findPrivDir(startDir, subdir, checkFile) {
 // Load vendored modules from priv/vendor at module load time
 const vendorDir = findPrivDir(__dirname, "vendor", "takumi_wasm_bg.wasm");
 const { initSync, Renderer } = await import(join(vendorDir, "takumi_wasm.js"));
-
-// Import sync-fetch using createRequire since it's bundled as CommonJS
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
-const syncFetch = require(join(vendorDir, "sync-fetch.cjs"));
 
 let renderer = null;
 
@@ -100,19 +96,30 @@ export function renderImage(jsonStr, width, height, format, quality, resources) 
   }
 }
 
-// Synchronous fetch for Node.js using sync-fetch
+// Synchronous fetch using Node subprocess with native fetch
+function fetchSync(url) {
+  const workerPath = join(vendorDir, "fetch-worker.mjs");
+  try {
+    const result = execFileSync(process.execPath, [workerPath], {
+      input: url,
+      maxBuffer: 50 * 1024 * 1024,
+      timeout: 30000,
+    });
+    const { data, error } = JSON.parse(result.toString());
+    if (error) return null;
+    return Buffer.from(data, 'base64');
+  } catch {
+    return null;
+  }
+}
+
 export function fetchAllSync(urls) {
   const results = [];
 
   for (const url of urls.toArray()) {
-    try {
-      const response = syncFetch(url);
-      if (response.ok) {
-        const buffer = response.buffer();
-        results.push([url, new BitArray(new Uint8Array(buffer))]);
-      }
-    } catch {
-      // Skip failed fetches silently
+    const buffer = fetchSync(url);
+    if (buffer) {
+      results.push([url, new BitArray(new Uint8Array(buffer))]);
     }
   }
 
