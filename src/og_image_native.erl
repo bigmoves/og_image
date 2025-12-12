@@ -4,33 +4,35 @@
 
 -define(APPNAME, og_image).
 -define(LIBNAME, og_image_nif).
+-define(VERSION, "1.1.0").
+-define(GITHUB_REPO, "bigmoves/og_image").
 
 init() ->
-    PrivDir = case code:priv_dir(?APPNAME) of
+    PrivDir = get_priv_dir(),
+    {Os, Arch} = detect_platform(),
+    NifName = lists:flatten(io_lib:format("~s-~s-~s.so", [?LIBNAME, Os, Arch])),
+    NifPath = filename:join(PrivDir, NifName),
+
+    %% Download if not present
+    case filelib:is_file(NifPath) of
+        true -> ok;
+        false -> download_nif(PrivDir, NifName, Os, Arch)
+    end,
+
+    %% Load the NIF (without .so extension)
+    NifPathNoExt = filename:join(PrivDir, lists:flatten(io_lib:format("~s-~s-~s", [?LIBNAME, Os, Arch]))),
+    erlang:load_nif(NifPathNoExt, 0).
+
+get_priv_dir() ->
+    case code:priv_dir(?APPNAME) of
         {error, bad_name} ->
-            %% Fallback for development: look relative to current dir
             case file:read_file_info("priv") of
                 {ok, _} -> "priv";
                 _ ->
-                    %% Try relative to the beam file
                     EbinDir = filename:dirname(code:which(?MODULE)),
                     filename:join(filename:dirname(EbinDir), "priv")
             end;
         Dir -> Dir
-    end,
-
-    %% Detect platform
-    {Os, Arch} = detect_platform(),
-
-    %% Try platform-specific binary first, then generic
-    PlatformLib = filename:join(PrivDir, io_lib:format("~s-~s-~s", [?LIBNAME, Os, Arch])),
-    GenericLib = filename:join(PrivDir, atom_to_list(?LIBNAME)),
-
-    case erlang:load_nif(PlatformLib, 0) of
-        ok -> ok;
-        {error, _} ->
-            %% Fall back to generic binary name
-            erlang:load_nif(GenericLib, 0)
     end.
 
 detect_platform() ->
@@ -50,6 +52,39 @@ detect_platform() ->
     end,
 
     {Os, Arch}.
+
+download_nif(PrivDir, NifName, Os, Arch) ->
+    Url = lists:flatten(io_lib:format(
+        "https://github.com/~s/releases/download/v~s/~s",
+        [?GITHUB_REPO, ?VERSION, NifName]
+    )),
+    io:format("og_image: Downloading NIF for ~s-~s...~n", [Os, Arch]),
+
+    %% Ensure priv dir exists
+    ok = filelib:ensure_dir(filename:join(PrivDir, "dummy")),
+
+    %% Start required applications
+    {ok, _} = application:ensure_all_started(ssl),
+    {ok, _} = application:ensure_all_started(inets),
+
+    NifPath = filename:join(PrivDir, NifName),
+
+    %% GitHub releases redirect to S3, so we need to follow redirects
+    HttpOpts = [
+        {ssl, [{verify, verify_none}]},
+        {autoredirect, true}
+    ],
+    Opts = [{body_format, binary}],
+
+    case httpc:request(get, {Url, []}, HttpOpts, Opts) of
+        {ok, {{_, 200, _}, _, Body}} ->
+            ok = file:write_file(NifPath, Body),
+            io:format("og_image: Downloaded ~s (~.1f MB)~n", [NifName, byte_size(Body) / 1048576]);
+        {ok, {{_, Code, Reason}, _, _}} ->
+            error({nif_download_failed, Code, Reason, Url});
+        {error, Reason} ->
+            error({nif_download_failed, Reason, Url})
+    end.
 
 %% NIF stub - replaced when NIF loads
 render_image(_JsonStr, _Width, _Height, _Format, _Quality, _Resources) ->
