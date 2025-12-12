@@ -1,5 +1,5 @@
 name = "og_image"
-version = "1.1.0"
+version = "1.1.1"
 
 description = "Generate OG images from Lustre elements"
 licences = ["Apache-2.0"]
