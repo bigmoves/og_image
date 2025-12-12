@@ -88,30 +88,14 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Create priv bundle for hex publishing
-        run: |
-          mkdir -p priv-bundle/priv
-          # Copy all platform binaries to priv/
-          cp artifacts/og_image_nif-*.so priv-bundle/priv/
-          # Create tarball
-          tar -czvf nif-bundle.tar.gz -C priv-bundle priv
-
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
             artifacts/og_image_nif-*.so
             artifacts/og_image_nif-*.sha256
-            nif-bundle.tar.gz
           generate_release_notes: true
           body: |
             ## Installation
 
-            ### For users (automatic)
-            The NIF will be downloaded automatically when you build.
-
-            ### For publishing to hex
-            1. Download `nif-bundle.tar.gz`
-            2. Extract: `tar -xzf nif-bundle.tar.gz`
-            3. This creates a `priv/` directory with all platform binaries
-            4. Run `gleam publish`
+            NIF binaries are downloaded automatically on first use.
