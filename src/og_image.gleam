@@ -53,12 +53,9 @@ pub fn defaults() -> Config {
 // Erlang Target Implementation
 // =============================================================================
 
-/// Render a Lustre element to an image (Erlang target)
 @target(erlang)
-pub fn render(
-  el: Element(msg),
-  config: Config,
-) -> Result(BitArray, RenderError) {
+/// Render a Lustre element to an image (Erlang target)
+pub fn render(el: Element(msg), config: Config) -> Result(BitArray, RenderError) {
   // Collect URLs from the element tree
   let urls = transform.collect_image_urls(el)
 
@@ -94,13 +91,10 @@ pub fn render(
 // JavaScript Target Implementation
 // =============================================================================
 
+@target(javascript)
 /// Render a Lustre element to an image (JavaScript target)
 /// Synchronous - auto-initializes WASM and fonts on first call
-@target(javascript)
-pub fn render(
-  el: Element(msg),
-  config: Config,
-) -> Result(BitArray, RenderError) {
+pub fn render(el: Element(msg), config: Config) -> Result(BitArray, RenderError) {
   // Collect URLs from the element tree
   let urls = transform.collect_image_urls(el)
 

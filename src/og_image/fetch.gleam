@@ -13,9 +13,9 @@ import gleam/list
 @target(erlang)
 import gleam/result
 
+@target(erlang)
 /// Fetch all URLs and return a list of (url, bytes) tuples
 /// Failed fetches are silently skipped
-@target(erlang)
 pub fn fetch_all(urls: List(String)) -> List(#(String, BitArray)) {
   urls
   |> list.filter_map(fn(url) {
