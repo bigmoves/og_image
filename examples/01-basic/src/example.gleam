@@ -1,5 +1,5 @@
 //// Unified example - works on both Erlang and JavaScript targets
-//// Run with: gleam run --target erlang
+//// Run with: gleam run
 //// Or:       gleam run --target javascript
 
 import gleam/io
@@ -57,7 +57,8 @@ pub fn main() {
       io.println("Render successful!")
       case simplifile.write_bits("output.png", png_bytes) {
         Ok(_) -> io.println("Saved to output.png")
-        Error(e) -> io.println("Failed to save: " <> simplifile.describe_error(e))
+        Error(e) ->
+          io.println("Failed to save: " <> simplifile.describe_error(e))
       }
     }
     Error(e) -> {
