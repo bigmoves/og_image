@@ -1,9 +1,19 @@
+@target(erlang)
 import gleam/io
+
+@target(erlang)
 import lustre/attribute
+
+@target(erlang)
 import lustre/element
+
+@target(erlang)
 import og_image
+
+@target(erlang)
 import simplifile
 
+@target(erlang)
 pub fn render_takumi_playground_test() {
   // Outer container - w-full h-full justify-center bg-black items-center
   // with radial gradient background

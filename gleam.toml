@@ -1,5 +1,5 @@
 name = "og_image"
-version = "1.0.0"
+version = "1.1.0"
 
 description = "Generate OG images from Lustre elements"
 licences = ["Apache-2.0"]
@@ -11,7 +11,7 @@ gleam_json = ">= 3.0.0 and < 4.0.0"
 gleam_http = ">= 3.0.0 and < 5.0.0"
 gleam_httpc = ">= 5.0.0 and < 6.0.0"
 lustre = ">= 5.0.0 and < 6.0.0"
-simplifile = ">= 2.0.0 and < 3.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"
+simplifile = ">= 2.0.0 and < 3.0.0"

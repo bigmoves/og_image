@@ -5,9 +5,9 @@
 
 Generate Open Graph images from Lustre elements.
 
-Built on [Takumi](https://takumi.kane.tw/).
+Works on both Erlang and JavaScript (Node, Deno, Bun) targets.
 
-NOTE: If there is a better way to generate Open Graph images in Erlang without a NIF, let me know!
+Built on [Takumi](https://takumi.kane.tw/) (NIF for Erlang, WASM for JavaScript).
 
 ## Installation
 
@@ -118,14 +118,6 @@ All CSS flexbox properties are supported, along with:
 ## Bundled Fonts
 
 The library includes [Geist](https://vercel.com/font) fonts (Sans and Mono) which are used by default. These fonts are licensed under the [SIL Open Font License](priv/fonts/OFL.txt).
-
-## Requirements
-
-- Erlang/OTP 26+
-- Gleam 1.0+
-
-For building from source (optional):
-- Rust
 
 ## Development
 

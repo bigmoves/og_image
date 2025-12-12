@@ -1,0 +1,11 @@
+{
+  "name": "og_image",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@takumi-rs/wasm": "^0.57.3"
+  },
+  "scripts": {
+    "update-wasm": "cp node_modules/@takumi-rs/wasm/pkg/takumi_wasm.js priv/vendor/ && cp node_modules/@takumi-rs/wasm/pkg/takumi_wasm_bg.wasm priv/vendor/"
+  }
+}

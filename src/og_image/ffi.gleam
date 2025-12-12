@@ -1,3 +1,7 @@
+//// Erlang FFI bindings for the Rust NIF
+//// Only compiled on Erlang target
+
+@target(erlang)
 /// Render an image from JSON with pre-fetched resources
 /// Resources is a list of (url, bytes) tuples
 /// Quality: 0-100 for JPEG/WebP, -1 for default
